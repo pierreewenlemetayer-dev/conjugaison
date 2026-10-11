@@ -115,7 +115,7 @@ function sheet(type,qs,withKey,result=false){
   }
   out+='</div>';
  });
- if(result)out+='<div class="print-score">Score : '+qs.filter(correct).length+' / '+qs.length+'</div>'+breakdownTable(qs,type);
+ if(result)out+='<div class="print-score">Score : '+qs.filter(correct).length+' / '+qs.length+'</div>';
  out+='</section>';
  if(withKey&&!result){
   out+='<section class="pdf-correction"><h2>Corrigé — '+heading+'</h2>';
