@@ -167,6 +167,6 @@ function closePrintPreview(){
  if(session?.type==='write'&&!session.finished)document.getElementById('notice').classList.remove('hidden');
  previewState=null;
 }
-function printResult(){if(!session?.finished)return;doPrint(session.type,session.qs,true,true)}
+function printResult(){if(!session?.finished)return;previewState={type:session.type,qs:session.qs,withKey:true,result:true};printPreview()}
 function printNew(type){try{const s=settings();document.getElementById('error').textContent='';const qs=makeQuestions(count,s);if(type==='qcm')for(const q of qs)q.options=choices(q);doPrint(type,qs,false)}catch(e){document.getElementById('error').textContent=e.message}}
 </script></body></html>
