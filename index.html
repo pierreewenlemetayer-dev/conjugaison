@@ -110,7 +110,7 @@ let previewState=null;
 function showPreview(){
  const el=document.getElementById('print-sheet');
  const key=previewState.withKey;
- el.innerHTML='<div class="no-print print-toolbar">'+(previewState.result?'':'<div class="print-key-choice"><strong>Corrigé :</strong> <label><input type="radio" name="pdf-key" value="no" '+(!key?'checked':'')+' onchange="setPreviewKey(false)"> Sans corrigé</label> <label><input type="radio" name="pdf-key" value="yes" '+(key?'checked':'')+' onchange="setPreviewKey(true)"> Avec corrigé</label></div>')+'<button type="button" onclick="printPreview()">Télécharger le document imprimable</button> <button type="button" class="secondary" onclick="closePrintPreview()">Fermer l’aperçu</button><p class="print-help">Ouvrez le document téléchargé dans Firefox, puis utilisez Fichier → Imprimer pour l’enregistrer en PDF.</p></div>'+sheet(previewState.type,previewState.qs,key,previewState.result);
+ el.innerHTML='<div class="no-print print-toolbar">'+(previewState.result?'':'<div class="print-key-choice"><strong>Corrigé :</strong> <label><input type="radio" name="pdf-key" value="no" '+(!key?'checked':'')+' onchange="setPreviewKey(false)"> Sans corrigé</label> <label><input type="radio" name="pdf-key" value="yes" '+(key?'checked':'')+' onchange="setPreviewKey(true)"> Avec corrigé</label></div>')+'<button type="button" onclick="printPreview()">Imprimer / enregistrer en PDF</button> <button type="button" class="secondary" onclick="closePrintPreview()">Fermer l’aperçu</button><p class="print-help">La fenêtre d’impression s’ouvre directement. Choisissez « Enregistrer au format PDF » comme destination.</p></div>'+sheet(previewState.type,previewState.qs,key,previewState.result);
  el.classList.remove('hidden');
  document.getElementById('interactive').classList.add('hidden');
  document.getElementById('notice').classList.add('hidden');
@@ -124,15 +124,20 @@ function printableDocument(){
 }
 function printPreview(){
  if(!previewState)return;
- // Le contexte intégré à ChatGPT peut bloquer window.print().
- // Un document autonome permet d'imprimer depuis un véritable onglet Firefox.
- const html=printableDocument();
- const blob=new Blob([html],{type:'text/html;charset=utf-8'});
- const url=URL.createObjectURL(blob);
- const link=document.createElement('a');
- link.href=url;link.download='conjugaison-a-imprimer.html';
- document.body.appendChild(link);link.click();link.remove();
- setTimeout(()=>URL.revokeObjectURL(url),60000);
+ const frame=document.createElement('iframe');
+ frame.setAttribute('aria-hidden','true');
+ frame.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none';
+ document.body.appendChild(frame);
+ frame.onload=()=>{
+  try{
+   frame.contentWindow.focus();
+   frame.contentWindow.print();
+  }catch(e){
+   document.getElementById('error').textContent='Impossible d’ouvrir l’impression automatiquement. Vérifiez les autorisations du navigateur.';
+  }
+  setTimeout(()=>frame.remove(),60000);
+ };
+ frame.srcdoc=printableDocument();
 }
 function doPrint(type,qs,withKey=false,result=false){
  previewState={type,qs,withKey,result};showPreview();
